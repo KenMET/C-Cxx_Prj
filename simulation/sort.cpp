@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
+#include <cstring>
 using namespace std;
 
 
@@ -100,12 +101,45 @@ public:
 		return SORT_SUCCESS;
 	}
 	
+	sort_status merge_sort(int *left_array, int left_len, int *right_array, int right_len) {
+		merge_sort(left_array, left_len);
+		merge_sort(right_array, right_len);
+		int tmp_left = left_len, tmp_right = right_len, sum_length = right_len + left_len;
+		int *tmp_point = new int[sum_length];
+
+		while(tmp_left > 0 && tmp_right > 0) {
+			if (left_array[tmp_left-1] > right_array[tmp_right-1]){
+				tmp_point[sum_length - 1] = left_array[tmp_left - 1];
+				tmp_left--;
+			} else {
+				tmp_point[sum_length - 1] = right_array[tmp_right - 1];
+				tmp_right--;
+			}
+			sum_length--;
+		}
+		while(tmp_left > 0){
+			tmp_point[sum_length - 1] = left_array[tmp_left - 1];
+			tmp_left--;
+			sum_length--;
+		}
+		while(tmp_right > 0){
+			tmp_point[sum_length - 1] = right_array[tmp_right - 1];
+			tmp_right--;
+			sum_length--;
+		}
+
+		memcpy(left_array, tmp_point, (right_len + left_len) * sizeof(int));
+
+		free(tmp_point);
+		return SORT_SUCCESS;
+	}
 	sort_status merge_sort(int *arry, int length=0){
 		if (length < 2){
 			return (length==1?SORT_SUCCESS:SORT_LEN_ERR);
 		}
-		
-		
+		int middle = length / 2;
+		merge_sort(&arry[0], middle, &arry[middle], length - middle);
+
 		return SORT_SUCCESS;
 	}
 };
@@ -125,39 +159,63 @@ could avoid:
 	exchange: 0.0008s
 */
 
-
 int main(int argc, char* argv[])
 {
 	ken_sort sort;
 	clock_t startTime,endTime;
-	int gen_cnt = 10;
-	int *arry = (int *)malloc(gen_cnt * sizeof(int));
+	int gen_cnt = 1000000;
+	int *arry = new int[gen_cnt];
 	srand(clock());
 	for (int i=0; i<gen_cnt; i++){
-		arry[i] = rand()%100;
+		arry[i] = rand();
 	}
 	
-	/**/
+	/*
 	cout<< "Origin:";
 	for (int i=0; i<gen_cnt; i++)
 		cout<< arry[i]<<" ";
-	cout<<endl;
+	cout<<endl;*/
 	
+	sort_status status;
+	int *tmp = new int[gen_cnt];
+	
+	memcpy(tmp, arry, gen_cnt * sizeof(int));
 	startTime = clock();//count start
-	//sort_status status = sort.bubble_sort(arry, gen_cnt);
-	//sort_status status = sort.select_sort(arry, gen_cnt);
-	//sort_status status = sort.insert_sort(arry, gen_cnt);
-	//sort_status status = sort.shell_sort(arry, gen_cnt);
-	sort_status status = sort.merge_sort(arry, gen_cnt);
+	//status = sort.bubble_sort(tmp, gen_cnt);
 	endTime = clock();//count end
+	cout <<"bubble_sort Res:"<<status<<" ["<< (double)(endTime-startTime)/CLOCKS_PER_SEC*1000<<"ms]"<< endl;
+
+	memcpy(tmp, arry, gen_cnt * sizeof(int));
+	startTime = clock();//count start
+	//status = sort.select_sort(tmp, gen_cnt);
+	endTime = clock();//count end
+	cout <<"select_sort Res:"<<status<<" ["<< (double)(endTime-startTime)/CLOCKS_PER_SEC*1000<<"ms]"<< endl;
+
+	memcpy(tmp, arry, gen_cnt * sizeof(int));
+	startTime = clock();//count start
+	//status = sort.insert_sort(tmp, gen_cnt);
+	endTime = clock();//count end
+	cout <<"insert_sort Res:"<<status<<" ["<< (double)(endTime-startTime)/CLOCKS_PER_SEC*1000<<"ms]"<< endl;
+
+	memcpy(tmp, arry, gen_cnt * sizeof(int));
+	startTime = clock();//count start
+	status = sort.shell_sort(tmp, gen_cnt);
+	endTime = clock();//count end
+	cout <<"shell_sort Res:"<<status<<" ["<< (double)(endTime-startTime)/CLOCKS_PER_SEC*1000<<"ms]"<< endl;
+
+	memcpy(tmp, arry, gen_cnt * sizeof(int));
+	startTime = clock();//count start
+	status = sort.merge_sort(tmp, gen_cnt);
+	endTime = clock();//count end
+	cout <<"merge_sort Res:"<<status<<" ["<< (double)(endTime-startTime)/CLOCKS_PER_SEC*1000<<"ms]"<< endl;
 	
-	cout <<"Sort Res:"<<status<<" ["<< (double)(endTime-startTime)/CLOCKS_PER_SEC<<"s]"<< endl;
-	/**/
+	/*
 	for (int i=0; i<gen_cnt; i++)
-		cout<< arry[i]<<" ";
-	cout<<endl;
+		cout<< tmp[i]<<" ";
+	cout<<endl;*/
 	
 	free(arry);
+	free(tmp);
 	return 0;
 }
 
