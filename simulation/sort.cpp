@@ -45,7 +45,7 @@ public:
 		}
 		for (int i=0; i<length-1; i++){
 			for(int j=i+1; j<length; j++){
-				if (is_exchange_necessary(arry[i], arry[j])){
+				if (arry[i] > arry[j]){
 					exchange(&arry[i], &arry[j]);
 				}
 			}
@@ -60,7 +60,7 @@ public:
 		for (int i=0; i<length-1; i++){
 			int min = i;
 			for (int j=i+1; j<length; j++){
-				if (is_exchange_necessary(arry[min], arry[j]))
+				if (arry[min] > arry[j])
 					min = j;
 			}
 			if (i != min){
@@ -75,7 +75,7 @@ public:
 		}
 		for (int i=1; i<length; i++){
 			int j = i - 1, tmp = arry[i];
-			while (j>=0 && is_exchange_necessary(arry[j], tmp)){
+			while (j>=0 && arry[j] > tmp){
 				arry[j + 1] = arry[j];
 				j--;
 			}
@@ -91,7 +91,7 @@ public:
 		for (int i=length/2; i>0; i/=2){
 			for(int j=i; j<length; j++){
 				int k = j, tmp = arry[j];
-				while(k-i >= 0 && is_exchange_necessary(arry[k - i], tmp)){
+				while(k-i >= 0 && arry[k - i] > tmp){
 					arry[k] = arry[k - i];
 					k -= i;
 				}
@@ -142,6 +142,38 @@ public:
 
 		return SORT_SUCCESS;
 	}
+
+
+	int paritition(int A[], int low, int high) {
+		int pivot = A[low];
+		while (low < high) {
+			while (low < high && A[high] >= pivot) {
+				--high;
+			}
+			A[low] = A[high];
+			while (low < high && A[low] <= pivot) {
+				++low;
+			}
+			A[high] = A[low];
+		}
+		A[low] = pivot;
+		return low;
+	}
+	void quick_sort_sub(int A[], int low, int high)	{
+		if (low < high) {
+			int pivot = paritition(A, low, high);
+			quick_sort_sub(A, low, pivot - 1);
+			quick_sort_sub(A, pivot + 1, high);
+		}
+	}
+	sort_status quick_sort(int *arry, int length=0){
+		if (length < 2){
+			return (length==1?SORT_SUCCESS:SORT_LEN_ERR);
+		}
+		quick_sort_sub(arry, 0, length);
+
+		return SORT_SUCCESS;
+	}
 };
 
 /*
@@ -169,7 +201,7 @@ int main(int argc, char* argv[])
 	for (int i=0; i<gen_cnt; i++){
 		arry[i] = rand();
 	}
-	
+	 w3ee q4
 	/*
 	cout<< "Origin:";
 	for (int i=0; i<gen_cnt; i++)
@@ -208,7 +240,13 @@ int main(int argc, char* argv[])
 	status = sort.merge_sort(tmp, gen_cnt);
 	endTime = clock();//count end
 	cout <<"merge_sort Res:"<<status<<" ["<< (double)(endTime-startTime)/CLOCKS_PER_SEC*1000<<"ms]"<< endl;
-	
+
+	memcpy(tmp, arry, gen_cnt * sizeof(int));
+	startTime = clock();//count start
+	status = sort.quick_sort(tmp, gen_cnt);
+	endTime = clock();//count end
+	cout <<"quick_sort Res:"<<status<<" ["<< (double)(endTime-startTime)/CLOCKS_PER_SEC*1000<<"ms]"<< endl;
+
 	/*
 	for (int i=0; i<gen_cnt; i++)
 		cout<< tmp[i]<<" ";
